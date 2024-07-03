@@ -1,25 +1,34 @@
 import { WebPlugin } from '@capacitor/core';
 
-import type { AllowedResult, GoogleFitPlugin } from './definitions';
+import type { GoogleFitPlugin } from './definitions';
 
 export class GoogleFitWeb extends WebPlugin implements GoogleFitPlugin {
-  constructor() {
-    super({
-      name: 'GoogleFit',
-      platforms: ['web'],
-    });
+  async connectToGoogleFit(): Promise<void> {
+    console.log('connectToGoogleFit');
   }
 
-  async connectToGoogleFit(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async isAllowed(): Promise<any> {
+    console.log('isAllowed');
   }
-  async isAllowed(): Promise<AllowedResult> {
-    throw new Error('Method not implemented.');
+
+  async getSteps(options: {
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    console.log('getSteps', options);
   }
-  async getHistory(): Promise<any> {
-    throw new Error('Method not implemented.');
+
+  async getWeight(options: {
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    console.log('getWeight', options);
   }
-  async getHistoryActivity(): Promise<any> {
-    throw new Error('Method not implemented.');
+
+  async getActivities(options: {
+    startDate: string;
+    endDate: string;
+  }): Promise<any> {
+    console.log('getActivities', options);
   }
 }

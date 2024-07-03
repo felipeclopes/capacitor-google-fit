@@ -1,77 +1,82 @@
 export interface GoogleFitPlugin {
-  /**
-   * Connect to Google Fit
-   * @returns {Promise}
-   * @resolve any
-   */
   connectToGoogleFit(): Promise<void>;
-
-  /**
-   * Returns wether the permissions are ok or not
-   * @returns {Promise}
-   * @resolve AllowedResult
-   */
-  isAllowed(): Promise<AllowedResult>;
-
-  /**
-   * Get history
-   * @returns {Promise}
-   * @resolve AccountData
-   */
-  getHistory(call: QueryInput): Promise<DayContainer>;
-
-  /**
-   * Get history activity
-   * @returns {Promise}
-   * @resolve AccountData
-   */
-  getHistoryActivity(call: QueryInput): Promise<ActivityContainer>;
+  isAllowed(): Promise<IsAllowedResult>;
+  getSteps(options: GetStepsOptions): Promise<StepsQueryResult>;
+  getWeight(options: GetWeightOptions): Promise<WeightQueryResult>;
+  getActivities(options: GetActivitiesOptions): Promise<ActivitiesQueryResult>;
 }
 
-export interface PermissionData {
-  allowed: boolean;
+export interface GetStepsOptions {
+  startDate: string;
+  endDate: string;
+  timeUnit: string;
+  bucketSize: number;
 }
 
-export interface QueryInput {
-  startTime: Date;
-  endTime: Date;
+export interface GetWeightOptions {
+  startDate: string;
+  endDate: string;
 }
 
-export interface ActivityContainer {
-  activities: HistoryActivityData[];
+export interface GetActivitiesOptions {
+  startDate: string;
+  endDate: string;
 }
 
-export interface DayContainer {
-  days: HistoryData[];
+export interface IsAllowedResult {
+  isAllowed: boolean;
 }
 
-export interface HistoryData {
-  start: string;
-  end: string;
-  /**
-  Distance travelled in meters.
-  Valid range: 0—100 meters per second
-   */
-  distance: string;
-  /**meters per second */
-  speed: string;
-  /*
-  This data type captures the total calories (in kilocalories) burned by the user, including calories burned at rest (BMR or Basalrate)!
-  */
-  calories: string;
+export interface StepsQueryResult {
+  data: {
+    startDate: string;
+    endDate: string;
+    value: number;
+  }[];
 }
 
-export interface HistoryActivityData {
-  start: string;
-  end: string;
-  distance?: string;
-  speed?: string;
-  calories?: string;
-  activity?: string;
-  weight?: string;
-  steps?: string;
+export interface WeightQueryResult {
+  data: {
+    startDate: string;
+    endDate: string;
+    value: number;
+  }[];
 }
 
-export interface AllowedResult {
-  allowed: boolean;
+export interface ActivitiesQueryResult {
+  data: {
+    startDate: string;
+    endDate: string;
+    activityType: string;
+    activityTypeId: number;
+    calories: number;
+    steps: number;
+    speed: number;
+    distance: number;
+    dataSource:
+      | 'com.google.activity.segment'
+      | 'com.google.activity.samples'
+      | string;
+  }[];
+}
+
+export interface SimpleData {
+  startDate: string;
+  endDate: string;
+  value: number;
+}
+
+export interface ActivityData extends SimpleData {
+  calories: number;
+  name: string;
+}
+
+export enum TimeUnit {
+  NANOSECONDS = 'NANOSECONDS',
+  MICROSECONDS = 'MICROSECONDS',
+  MILLISECONDS = 'MILLISECONDS',
+  SECONDS = 'SECONDS',
+  MINUTES = 'MINUTES',
+  HOURS = 'HOURS',
+  DAYS = 'DAYS',
 }
