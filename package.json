@@ -1,5 +1,5 @@
 {
-  "name": "@perfood/capacitor-google-fit",
+  "name": "@felipeclopes/capacitor-google-fit",
   "version": "6.0.1",
   "description": "Capacitor plugin to read data from Google Fit.",
   "main": "dist/plugin.cjs.js",
@@ -15,10 +15,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/perfood/capacitor-google-fit.git"
+    "url": "git+https://github.com/felipeclopes/capacitor-google-fit.git"
   },
   "bugs": {
-    "url": "https://github.com/perfood/capacitor-google-fit/issues"
+    "url": "https://github.com/felipeclopes/capacitor-google-fit/issues"
   },
   "keywords": [
     "capacitor",
