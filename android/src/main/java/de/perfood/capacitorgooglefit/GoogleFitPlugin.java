@@ -56,15 +56,7 @@ public class GoogleFitPlugin extends Plugin {
     FitnessOptions fitnessOptions = FitnessOptions.builder()
       .addDataType(DataType.TYPE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
       .addDataType(DataType.TYPE_STEP_COUNT_CUMULATIVE, FitnessOptions.ACCESS_READ)
-      .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA)
-      .addDataType(DataType.TYPE_WEIGHT, FitnessOptions.ACCESS_READ)
-      .addDataType(DataType.TYPE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
-      .addDataType(DataType.AGGREGATE_CALORIES_EXPENDED, FitnessOptions.ACCESS_READ)
-    //   .addDataType(DataType.TYPE_DISTANCE_DELTA, FitnessOptions.ACCESS_READ)
-    //   .addDataType(DataType.AGGREGATE_DISTANCE_DELTA, FitnessOptions.ACCESS_READ)
-    //   .addDataType(DataType.TYPE_SPEED, FitnessOptions.ACCESS_READ)
-      .addDataType(DataType.TYPE_ACTIVITY_SEGMENT, FitnessOptions.ACCESS_READ)
-      .addDataType(DataType.TYPE_HEIGHT, FitnessOptions.ACCESS_READ)
+      .addDataType(DataType.AGGREGATE_STEP_COUNT_DELTA, FitnessOptions.ACCESS_READ)
       .build();
 
     @PluginMethod
@@ -276,8 +268,6 @@ public class GoogleFitPlugin extends Plugin {
           .read(DataType.TYPE_ACTIVITY_SEGMENT)
           .read(DataType.TYPE_CALORIES_EXPENDED)
           .read(DataType.TYPE_STEP_COUNT_DELTA)
-        //   .read(DataType.TYPE_DISTANCE_DELTA)
-        //   .read(DataType.TYPE_SPEED)
           .setTimeRange(startDate, endDate, TimeUnit.MILLISECONDS)
           .bucketByActivitySegment(1, TimeUnit.MINUTES)
           .build();
