@@ -1,34 +1,47 @@
+import type { ListenerCallback, PluginListenerHandle} from '@capacitor/core';
 import { WebPlugin } from '@capacitor/core';
 
-import type { GoogleFitPlugin } from './definitions';
+import type { GoogleFitPlugin, AllowedResult } from './definitions';
 
 export class GoogleFitWeb extends WebPlugin implements GoogleFitPlugin {
-  async connectToGoogleFit(): Promise<void> {
-    console.log('connectToGoogleFit');
+  constructor() {
+    super({
+      name: 'GoogleFit',
+      platforms: ['web'],
+    });
   }
-
-  async isAllowed(): Promise<any> {
-    console.log('isAllowed');
+  
+  addListener(
+    eventName: 'googleFitAllowed',
+    listenerFunc?: ListenerCallback,
+  ): Promise<PluginListenerHandle> & PluginListenerHandle {
+    throw new Error(`Method not implemented.${eventName}${listenerFunc}`);
   }
-
-  async getSteps(options: {
-    startDate: string;
-    endDate: string;
-  }): Promise<any> {
-    console.log('getSteps', options);
+  connect(): Promise<void> {
+    throw new Error('Method not implemented.');
   }
-
-  async getWeight(options: {
-    startDate: string;
-    endDate: string;
-  }): Promise<any> {
-    console.log('getWeight', options);
+  async disable(): Promise<void> {
+    throw new Error('Method not implemented.');
   }
-
-  async getActivities(options: {
-    startDate: string;
-    endDate: string;
-  }): Promise<any> {
-    console.log('getActivities', options);
+  async logout(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  async open(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  async isAllowed(): Promise<AllowedResult> {
+    throw new Error('Method not implemented.');
+  }
+  async isPermissionGranted(): Promise<AllowedResult> {
+    throw new Error('Method not implemented.');
+  }
+  async isInstalled(): Promise<{ value: boolean }> {
+    throw new Error('Method not implemented.');
+  }
+  async getHistory(): Promise<any> {
+    throw new Error('Method not implemented.');
+  }
+  async getHistoryActivity(): Promise<any> {
+    throw new Error('Method not implemented.');
   }
 }

@@ -1,82 +1,128 @@
+import type { PluginListenerHandle } from '@capacitor/core';
+
 export interface GoogleFitPlugin {
-  connectToGoogleFit(): Promise<void>;
-  isAllowed(): Promise<IsAllowedResult>;
-  getSteps(options: GetStepsOptions): Promise<StepsQueryResult>;
-  getWeight(options: GetWeightOptions): Promise<WeightQueryResult>;
-  getActivities(options: GetActivitiesOptions): Promise<ActivitiesQueryResult>;
+  /**
+   * Connect to Google Fit
+   * @returns {Promise}
+   * @resolve any
+   */
+  connect(): Promise<void>;
+
+  /**
+   * Disable Google Fit
+   */
+  disable(): Promise<void>;
+
+  /**
+   * Logout from Google Fit
+   */
+  logout(): Promise<void>;
+
+  /**
+   * Open
+   */
+  open(): Promise<void>;
+
+  /**
+   * Returns wether the permissions are ok or not
+   * @returns {Promise}
+   * @resolve AllowedResult
+   */
+  isAllowed(): Promise<AllowedResult>;
+
+  /**
+   * Check if permission is granted
+   */
+  isPermissionGranted(): Promise<AllowedResult>;
+
+  /**
+   * Check if Google Fit is installed
+   */
+  isInstalled(): Promise<{ value: boolean }>;
+
+  /**
+   * Get history
+   * @returns {Promise}
+   * @resolve AccountData
+   */
+  getHistory(call: QueryInput): Promise<DayContainer>;
+
+  /**
+   * Get history activity
+   * @returns {Promise}
+   * @resolve AccountData
+   */
+  getHistoryActivity(call: QueryInput): Promise<ActivityContainer>;
+
+  addListener(
+    eventName: 'googleFitAllowed',
+    listenerFunc: (info: GoogleFitPermissionData) => void,
+  ): Promise<PluginListenerHandle>;
 }
 
-export interface GetStepsOptions {
-  startDate: string;
-  endDate: string;
-  timeUnit: string;
-  bucketSize: number;
+export interface PermissionData {
+  allowed: boolean;
 }
 
-export interface GetWeightOptions {
-  startDate: string;
-  endDate: string;
+export interface GoogleFitPermissionData {
+  value: 'success' | 'failure';
 }
 
-export interface GetActivitiesOptions {
-  startDate: string;
-  endDate: string;
+export interface QueryInput {
+  startTime: Date;
+  endTime: Date;
 }
 
-export interface IsAllowedResult {
-  isAllowed: boolean;
+export interface SetSleepData {
+  startTime: Date;
+  endTime: Date;
+  id: string;
+  sleepStage: number;
 }
 
-export interface StepsQueryResult {
-  data: {
-    startDate: string;
-    endDate: string;
-    value: number;
-  }[];
-}
-
-export interface WeightQueryResult {
-  data: {
-    startDate: string;
-    endDate: string;
-    value: number;
-  }[];
-}
-
-export interface ActivitiesQueryResult {
-  data: {
-    startDate: string;
-    endDate: string;
-    activityType: string;
-    activityTypeId: number;
-    calories: number;
-    steps: number;
-    speed: number;
-    distance: number;
-    dataSource:
-      | 'com.google.activity.segment'
-      | 'com.google.activity.samples'
-      | string;
-  }[];
-}
-
-export interface SimpleData {
-  startDate: string;
-  endDate: string;
+export interface SetStepCountData {
+  startTime: Date;
+  endTime: Date;
   value: number;
 }
 
-export interface ActivityData extends SimpleData {
-  calories: number;
-  name: string;
+export interface ActivityContainer {
+  activities: HistoryActivityData[];
 }
 
-export enum TimeUnit {
-  NANOSECONDS = 'NANOSECONDS',
-  MICROSECONDS = 'MICROSECONDS',
-  MILLISECONDS = 'MILLISECONDS',
-  SECONDS = 'SECONDS',
-  MINUTES = 'MINUTES',
-  HOURS = 'HOURS',
-  DAYS = 'DAYS',
+export interface DayContainer {
+  days: HistoryData[];
+}
+
+export interface HistoryData {
+  start: string;
+  end: string;
+  /**
+  Distance travelled in meters.
+  Valid range: 0—100 meters per second
+   */
+  distance: string;
+  /**meters per second */
+  speed: string;
+  /*
+  This data type captures the total calories (in kilocalories) burned by the user, including calories burned at rest (BMR or Basalrate)!
+  */
+  calories: string;
+}
+
+export interface HistoryActivityData {
+  start: string;
+  end: string;
+  distance?: string;
+  speed?: string;
+  calories?: string;
+  activity?: string;
+  weight?: string;
+  steps?: string;
+  sourceName: string;
+  sourceType: string;
+}
+
+export interface AllowedResult {
+  allowed: boolean;
 }
