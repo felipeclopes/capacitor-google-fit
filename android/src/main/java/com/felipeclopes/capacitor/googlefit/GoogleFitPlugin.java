@@ -1,5 +1,6 @@
 package com.felipeclopes.capacitor.googlefit;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,9 @@ import android.util.Log;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.getcapacitor.JSObject;
 import com.getcapacitor.NativePlugin;
 import com.getcapacitor.Plugin;
@@ -22,6 +26,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.FitnessOptions;
 import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataSource;
 import com.google.android.gms.fitness.data.DataType;
@@ -42,14 +47,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @CapacitorPlugin(name = "GoogleFit")
-@NativePlugin(requestCodes = { GoogleFitPlugin.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE, GoogleFitPlugin.RC_SIGN_IN, GoogleFitPlugin.ACTIVITY_RECOGNITION })
+@NativePlugin(requestCodes = { GoogleFitPlugin.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE, GoogleFitPlugin.RC_SIGN_IN })
 public class GoogleFitPlugin extends Plugin {
 
     public static final String TAG = "HistoryApi";
     static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 19849;
     static final int RC_SIGN_IN = 1337;
-
-    static final int ACTIVITY_RECOGNITION = 5025;
+    private static final int REQUEST_CODE_ACTIVITY_RECOGNITION = 1;
 
     private FitnessOptions getFitnessSignInOptions() {
         // FitnessOptions instance, declaring the Fit API data types
@@ -145,17 +149,26 @@ public class GoogleFitPlugin extends Plugin {
     }
 
     private void requestPermissions() {
-        // GoogleSignInOptions を構築
+        this.requestActivityRecognitionPermission();
+
+        // GoogleSignInOptions
         GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .addExtension(getFitnessSignInOptions())
                 .build();
 
-        // GoogleSignInClient を取得
+        // GoogleSignInClient
         GoogleSignInClient signInClient = GoogleSignIn.getClient(getActivity(), signInOptions);
 
-        // サインインインテントを取得して起動
         Intent signInIntent = signInClient.getSignInIntent();
         activityResultCallback.launch(signInIntent);
+    }
+
+    private void requestActivityRecognitionPermission() {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACTIVITY_RECOGNITION)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{ Manifest.permission.ACTIVITY_RECOGNITION },
+                    REQUEST_CODE_ACTIVITY_RECOGNITION);
+        }
     }
 
     @PluginMethod
@@ -309,6 +322,7 @@ public class GoogleFitPlugin extends Plugin {
                 );
     }
 
+
     @PluginMethod
     public Task<DataReadResponse> getHistoryActivity(final PluginCall call) throws ParseException {
         final GoogleSignInAccount account = getAccount();
@@ -324,19 +338,12 @@ public class GoogleFitPlugin extends Plugin {
             return null;
         }
 
-        DataSource stepCountDataSource = new DataSource.Builder()
-                .setAppPackageName("com.google.android.gms")
-                .setDataType(DataType.TYPE_STEP_COUNT_DELTA)
-                .setType(DataSource.TYPE_DERIVED)
-                .setStreamName("estimated_steps")
-                .build();
-
         // https://developers.google.com/android/reference/com/google/android/gms/fitness/request/DataReadRequest.Builder
         DataReadRequest readRequest = new DataReadRequest.Builder()
-                .aggregate(stepCountDataSource)
+                .aggregate(DataType.AGGREGATE_STEP_COUNT_DELTA)
                 .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
                 .enableServerQueries()
-                .bucketByTime(1, TimeUnit.HOURS) // Bucket by 30 minutes interval
+                .bucketByTime(1, TimeUnit.HOURS) // Bucket by 1 hour interval
                 .build();
 
         return Fitness
@@ -349,24 +356,27 @@ public class GoogleFitPlugin extends Plugin {
                                 List<Bucket> buckets = dataReadResponse.getBuckets();
                                 JSONArray activities = new JSONArray();
                                 for (Bucket bucket : buckets) {
-                                    JSONObject summary = new JSONObject();
-                                    try {
-                                        summary.put("start", timestampToDate(bucket.getStartTime(TimeUnit.MILLISECONDS)));
-                                        summary.put("end", timestampToDate(bucket.getEndTime(TimeUnit.MILLISECONDS)));
+                                    String bucketStart = timestampToDate(bucket.getStartTime(TimeUnit.MILLISECONDS));
+                                    String bucketEnd = timestampToDate(bucket.getEndTime(TimeUnit.MILLISECONDS));
+                                    Integer stepsInBucket = 0;
 
-                                        List<DataSet> dataSets = bucket.getDataSets();
-
-                                        for (DataSet dataSet : dataSets) {
-                                            if (dataSet.getDataPoints().size() > 0) {
-                                                summary.put("steps", dataSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS));
-                                            }
+                                    for (DataSet dataSet : bucket.getDataSets()) {
+                                        for (DataPoint dp : dataSet.getDataPoints()) {
+                                            stepsInBucket += dp.getValue(dp.getDataType().getFields().get(0)).asInt();
                                         }
-                                        summary.put("activity", bucket.getActivity());
+                                    }
+
+                                    JSONObject stepEntry = new JSONObject();
+
+                                    try {
+                                        stepEntry.put("start", bucketStart);
+                                        stepEntry.put("end", bucketEnd);
+                                        stepEntry.put("steps", stepsInBucket);
+                                        activities.put(stepEntry);
                                     } catch (JSONException e) {
                                         call.reject(e.getMessage());
                                         return;
                                     }
-                                    activities.put(summary);
                                 }
 
                                 JSObject result = new JSObject();
