@@ -42,12 +42,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @CapacitorPlugin(name = "GoogleFit")
-@NativePlugin(requestCodes = { GoogleFitPlugin.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE, GoogleFitPlugin.RC_SIGN_IN })
+@NativePlugin(requestCodes = { GoogleFitPlugin.GOOGLE_FIT_PERMISSIONS_REQUEST_CODE, GoogleFitPlugin.RC_SIGN_IN, GoogleFitPlugin.ACTIVITY_RECOGNITION })
 public class GoogleFitPlugin extends Plugin {
 
     public static final String TAG = "HistoryApi";
     static final int GOOGLE_FIT_PERMISSIONS_REQUEST_CODE = 19849;
     static final int RC_SIGN_IN = 1337;
+
+    static final int ACTIVITY_RECOGNITION = 5025;
 
     private FitnessOptions getFitnessSignInOptions() {
         // FitnessOptions instance, declaring the Fit API data types
